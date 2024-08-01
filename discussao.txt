@@ -1,0 +1,12 @@
+Problema:
+Encontrar limiar de intervalos que segmenta todos os voos.
+Possíveis soluções: 
+1)Percorrer o csv de airports, e tentar encontrar uma limiar que gerasse o menor tempo de voo possível dada essa combinação de aeroportos.
+Problema: Complexidade alta, teriamos que pensar em ordenar os arquivos em chunks de distância baseadas em um ponto de origem, sendo assim teriamos que pensar em definir uma distancia de treshold entre aeroportos
+para agrupar-los, pois se não fizermos isso temos a chance de gerar computar distancias de voos que não são possiveis de fazer. Dai, usariamos essa limiar para segmentar os voos.
+
+
+2)Definir uma limiar base, e por tentativa e erro encontrar uma que minimiza os voos 'impossíveis', de duração duvidosa. Depois disso, bastaria remover os voos que por um acaso tiveram
+a mesma origem e o mesmo destino. Depois, removeriamos os outliers que são casos incomuns como por exemplo os casos de voos que tem duração muito pequena que são provenientes de destinos 
+inóspitos, como ilhas. 
+Problema: Essa solução ainda pode ocorrer inconsistencias, mas realisticamente falando é a mais viavel.

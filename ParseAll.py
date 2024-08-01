@@ -32,7 +32,7 @@ def is_interval_greater_than_three_minutes(date_format, date1, date2):
         d1 = datetime.strptime(date1, date_format)
         d2 = datetime.strptime(date2, date_format)
         diff_in_minutes = abs((d2 - d1) / timedelta(minutes=1))
-        return diff_in_minutes > 6
+        return diff_in_minutes > 10
     except Exception as e:
         print(f"Error comparing dates: {e}")
         return False

@@ -25,8 +25,8 @@ def export_table_to_csv(db_file, table_name, output_csv_file):
 
 
 db_file = 'Database/Flights.db'
-# table_name = 'flightSummary' 
-# output_csv_file = 'Dataset/flightSummaryNew.csv'  
-table_name = 'Longest_Flight_Sequences'
-output_csv_file = 'Dataset/Longest_Flight_Sequences.csv'
+table_name = 'flightSummary' 
+output_csv_file = 'Dataset/flightSummaryNew.csv'  
+# table_name = 'Longest_Flight_Sequences'
+# output_csv_file = 'Dataset/Longest_Flight_Sequences.csv'
 export_table_to_csv(db_file, table_name, output_csv_file)
