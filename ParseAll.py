@@ -1,6 +1,7 @@
 import csv
 import os
 from datetime import datetime, timedelta
+import sqlite3
 
 #Script que segmenta os voos baseado na diferença de tempo entre as posições entre os registros, e puxa 
 # os aeroportos da origem e destino pelas coordenadas das mesmas.
@@ -32,7 +33,7 @@ def is_interval_greater_than_three_minutes(date_format, date1, date2):
         d1 = datetime.strptime(date1, date_format)
         d2 = datetime.strptime(date2, date_format)
         diff_in_minutes = abs((d2 - d1) / timedelta(minutes=1))
-        return diff_in_minutes > 10
+        return diff_in_minutes >= 30
     except Exception as e:
         print(f"Error comparing dates: {e}")
         return False
@@ -149,8 +150,57 @@ def parse_directory(directory, airport_file, output_file):
 
     print(f"Data written to {output_file}")
 
+def create_table(conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS flightList (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        dtDeparture TEXT NOT NULL,
+        codeDeparture TEXT,
+        NameDeparture TEXT,
+        CityDeparture TEXT,
+        dtArrival TEXT NOT NULL,
+        codeDestin TEXT,
+        NameDestin TEXT,
+        cityDestin TEXT,
+        idAircraft TEXT NOT NULL,
+        modelAircraft TEXT
+    )
+    ''')
+    conn.commit()
+
+def insert_data(conn, csv_file):
+    cursor = conn.cursor()
+    with open(csv_file, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            cursor.execute('''
+            INSERT INTO flightList (
+                dtDeparture, codeDeparture, NameDeparture, CityDeparture,
+                dtArrival, codeDestin, NameDestin, cityDestin, idAircraft, modelAircraft
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                row['dtDeparture'], row['codeDeparture'], row['NameDeparture'], row['CityDeparture'],
+                row['dtArrival'], row['codeDestin'], row['NameDestin'], row['cityDestin'],
+                row['idAircraft'], row['modelAircraft']
+            ))
+    conn.commit()
+
 # Example usage
 directory = "E:/Projetos/TesteTecnico/Dataset/PosSorted/"
 airport_file = "E:/Projetos/TesteTecnico/Dataset/airports.csv"
 output_file = "E:/Projetos/TesteTecnico/Dataset/combined_flightsNew.csv"
 parse_directory(directory, airport_file, output_file)
+
+
+db_file = 'Database/Flights.db'
+csv_file = 'E:/Projetos/TesteTecnico/Dataset/combined_flightsNew.csv'
+    
+conn = sqlite3.connect(db_file)
+create_table(conn)
+insert_data(conn, csv_file)
+print('Data inserted successfully.')
+conn.close()
+
+
+

@@ -1,6 +1,10 @@
 import sqlite3
+import pandas as pd
 from datetime import datetime
-#Gera dataset de treino, puxando os voos segmentados  na tabela 'flightList' e salvnado na tabela 'flightSummary'.
+import os
+
+# Gera dataset de treino, puxando os voos segmentados na tabela 'flightList' e salvando na tabela 'flightSummary'.
+
 def get_weekday(date_str):
     date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
     return date.weekday() + 1
@@ -18,6 +22,7 @@ def generate_flight_summary(db_file):
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
 
+    # Criar tabela flightSummary se não existir
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS flightSummary (
             OriginCode TEXT,
@@ -29,21 +34,35 @@ def generate_flight_summary(db_file):
         );
     ''')
 
+    # Limpar a tabela existente
     cursor.execute('DELETE FROM flightSummary')
+
+    # Inserir dados na tabela flightSummary
     cursor.execute('''
         INSERT INTO flightSummary (OriginCode, DestinCode, WeekDay, HourDeparture, ModelAircraft, Duration)
         SELECT 
             codeDeparture AS OriginCode,
             codeDestin AS DestinCode,
-            strftime('%w', dtDeparture) + 1 AS WeekDay,  -- Adjust for SQLite's strftime output
+            strftime('%w', dtDeparture) + 1 AS WeekDay,  -- Ajustar para a saída do strftime do SQLite
             strftime('%H', dtDeparture) AS HourDeparture,
             modelAircraft AS ModelAircraft,
             (strftime('%s', dtArrival) - strftime('%s', dtDeparture)) / 60 AS Duration
         FROM flightList
     ''')
     conn.commit()
+
+    # Exportar a tabela flightSummary para um arquivo CSV
+    df = pd.read_sql_query('SELECT * FROM flightSummary', conn)
+    
+    output_csv_path = 'dataset/flight_summary.csv'
+    os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
+    df.to_csv(output_csv_path, index=False)
+    
+    print(f"Table 'flightSummary' saved as 'flight_summary.csv'.")
+
+    # Fechar a conexão
     conn.close()
 
-
+# Exemplo de uso
 db_file = 'Database/Flights.db'
 generate_flight_summary(db_file)

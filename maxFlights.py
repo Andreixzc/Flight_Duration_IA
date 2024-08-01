@@ -1,15 +1,16 @@
 import sqlite3
 import pandas as pd
 from datetime import timedelta
+import os
 
-#Query que extrai os voos máximos por aeronave no periodo de 2 dias e salva na tabela 'Longest_Flight_Sequences'.
+# Query que extrai os voos máximos por aeronave no período de 2 dias e salva na tabela 'Longest_Flight_Sequences'.
 
 def analyze_flights(db_path):
-    # Connect to SQLite database
+    # Conectar ao banco de dados SQLite
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    # Query to get the flight data
+    # Query para obter os dados dos voos
     query = '''
     SELECT dtDeparture, idAircraft, modelAircraft
     FROM flightlist
@@ -18,10 +19,10 @@ def analyze_flights(db_path):
     
     df = pd.read_sql_query(query, conn, parse_dates=['dtDeparture'])
     
-    # Initialize an empty list to hold results
+    # Inicializar uma lista vazia para armazenar os resultados
     results = []
 
-    # Process each aircraft
+    # Processar cada aeronave
     for aircraft_id, aircraft_data in df.groupby('idAircraft'):
         aircraft_data = aircraft_data.sort_values(by='dtDeparture')
         
@@ -29,7 +30,7 @@ def analyze_flights(db_path):
         best_start_date = None
         best_end_date = None
         
-        # Evaluate all 2-day periods
+        # Avaliar todos os períodos de 2 dias
         for i in range(len(aircraft_data)):
             start_date = aircraft_data.iloc[i]['dtDeparture']
             end_date = start_date + timedelta(days=2)
@@ -40,26 +41,34 @@ def analyze_flights(db_path):
                 best_start_date = start_date
                 best_end_date = end_date
 
-        # Prepare result for this aircraft
+        # Preparar o resultado para esta aeronave
         if max_sequence > 0:
             result = {
                 'Period': f"{best_start_date.date()} to {best_end_date.date()}",
-                'Aircraft': f"{aircraft_id} - {aircraft_data.iloc[0]['modelAircraft']}",
+                'Aircraft ID': aircraft_id,
+                'Model Aircraft': aircraft_data.iloc[0]['modelAircraft'],
                 'Number of flights flown': max_sequence
             }
             results.append(result)
 
-    # Convert results to DataFrame
+    # Converter resultados para DataFrame
     results_df = pd.DataFrame(results)
     
-    # Create a new table and insert results
+    # Salvar DataFrame em um arquivo CSV
+    output_csv_path = 'dataset/longest_flight_sequences.csv'
+    os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
+    results_df.to_csv(output_csv_path, index=False)
+    
+    print("Table 'Longest_Flight_Sequences' saved as 'longest_flight_sequences.csv'.")
+
+    # Criar uma nova tabela e inserir resultados
     results_df.to_sql('Longest_Flight_Sequences', conn, if_exists='replace', index=False)
     
     print("Table 'Longest_Flight_Sequences' created successfully.")
     
-    # Close the connection
+    # Fechar a conexão
     conn.close()
 
-# Example usage
+# Exemplo de uso
 db_path = 'Database/Flights.db'
 analyze_flights(db_path)

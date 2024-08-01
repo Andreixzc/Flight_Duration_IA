@@ -146,6 +146,8 @@ def parse_directory(directory, airport_file, output_file):
     print(f"Data written to {output_file}")
 
 # Example usage
+db_file = 'Database/Flights.db'
+csv_file = 'E:/Projetos/TesteTecnico/Dataset/combined_flightsNew.csv'
 directory = "E:/Projetos/TesteTecnico/Dataset/PosSorted/"
 airport_file = "E:/Projetos/TesteTecnico/Dataset/airports.csv"
 output_file = "E:/Projetos/TesteTecnico/Dataset/combined_flightsNew.csv"
