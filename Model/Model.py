@@ -6,25 +6,32 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-import joblib  # Import joblib for saving the model
+import joblib
+import os
+import numpy as np
+
+# Função para encontrar o próximo número de pasta disponível
+def get_next_metricas_folder():
+    base_path = 'metricas'
+    i = 1
+    while os.path.exists(f'{base_path}{i}'):
+        i += 1
+    return f'{base_path}{i}'
 
 # Load the dataset
 df = pd.read_csv('../Dataset/trainingFlightTable.csv')
-
-# Display the first few rows of the dataframe
-print(df.head())
 
 # Define features and target
 X = df[['OriginCode', 'DestinCode', 'WeekDay', 'HourDeparture', 'ModelAircraft']]
 y = df['Duration']
 
-# Preprocessing for numeric features
+# Features numericas
 numeric_features = ['WeekDay', 'HourDeparture']
 numeric_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='median')),
     ('scaler', StandardScaler())])
 
-# Preprocessing for categorical features
+# Variáveis categóricas
 categorical_features = ['OriginCode', 'DestinCode', 'ModelAircraft']
 categorical_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='most_frequent')),
@@ -36,43 +43,46 @@ preprocessor = ColumnTransformer(
         ('num', numeric_transformer, numeric_features),
         ('cat', categorical_transformer, categorical_features)])
 
-# Define the model pipeline
+# Pipeline do modelo
 model = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', RandomForestRegressor(n_estimators=100, random_state=0))])
 
-# Split the data into training and testing sets
+# Dividindo o dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-# Train the model
+# Treinando o modelo
 model.fit(X_train, y_train)
 
-# Predict on the test set
+# Prevendo
 y_pred = model.predict(X_test)
 
-# Evaluate the model
+# Calcular MSE e RMSE
 mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
 print(f'Mean Squared Error: {mse}')
+print(f'Root Mean Squared Error: {rmse}')
 
-# Save the model to a file
-joblib.dump(model, 'flight_duration_model.pkl')
-print("Model saved to 'flight_duration_model.pkl'")
+# Criar pastas se não existirem
+os.makedirs('trainedModel', exist_ok=True)
 
-# Save predictions and actual values to a text file
-with open('predictions_vs_actual.csv', 'w') as file:
-    file.write('Actual Duration, Predicted Duration\n')
-    for actual, predicted in zip(y_test, y_pred):
-        file.write(f'{actual:.2f}, {predicted:.2f}\n')
+# Obter o próximo número disponível para a pasta de métricas
+metrics_folder = get_next_metricas_folder()
+os.makedirs(metrics_folder, exist_ok=True)
 
-# Example data for prediction (Uncomment to use)
-# example_data = pd.DataFrame({
-#     'OriginCode': ['JFK'],
-#     'DestinCode': ['LAX'],
-#     'WeekDay': [3],
-#     'HourDeparture': [14],
-#     'ModelAircraft': ['B737']
-# })
+# Salvar o modelo em um arquivo
+joblib.dump(model, 'trainedModel/flight_duration_model.pkl')
+print(f"Model saved to 'trainedModel/flight_duration_model.pkl'")
 
-# # Predict flight duration
-# predicted_duration = model.predict(example_data)
-# print(f'Predicted Duration: {predicted_duration[0]} minutes')
+# Salvar MSE e RMSE em um arquivo de texto
+with open(f'{metrics_folder}/metrics.txt', 'w') as file:
+    file.write(f'Mean Squared Error: {mse}\n')
+    file.write(f'Root Mean Squared Error: {rmse}\n')
+
+# Salvar previsões e valores reais em um arquivo CSV
+predictions_df = pd.DataFrame({
+    'Actual Duration': y_test,
+    'Predicted Duration': y_pred
+})
+predictions_df.to_csv(f'{metrics_folder}/predictions_vs_actual.csv', index=False)
+print(f"Predictions and actual values saved to '{metrics_folder}/predictions_vs_actual.csv'")
