@@ -28,7 +28,7 @@ class Flight:
         self.id_aircraft = id_aircraft
         self.model_aircraft = model_aircraft
 
-def is_interval_greater_than_three_minutes(date_format, date1, date2):
+def checkInterval(date_format, date1, date2):
     try:
         d1 = datetime.strptime(date1, date_format)
         d2 = datetime.strptime(date2, date_format)
@@ -78,7 +78,7 @@ def parse_file(file_path, date_format, airports):
 
             while j < len(positions):
                 next_position = positions[j]
-                if is_interval_greater_than_three_minutes(date_format, end.time, next_position.time):
+                if checkInterval(date_format, end.time, next_position.time):
                     break
                 else:
                     end = next_position
@@ -218,7 +218,7 @@ print('Data inserted successfully.')
 conn.close()
 
 remove_identical_flights(db_file)
-print('Identical flights removed successfully.')
+print('Removendo voos impossiveis.')
 
 
 

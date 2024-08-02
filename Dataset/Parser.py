@@ -22,7 +22,7 @@ class Flight:
     def __str__(self):
         return f"Flight [saida={self.saida}, chegada={self.chegada}]"
 
-def is_interval_greater_than_three_minutes(time1, time2):
+def checkInterval(time1, time2):
     try:
         date1 = datetime.strptime(time1, '%Y-%m-%d %H:%M:%S.%f')
         date2 = datetime.strptime(time2, '%Y-%m-%d %H:%M:%S.%f')
@@ -61,7 +61,7 @@ def parse(filename):
             j = i + 1
             while j < len(positions):
                 next_pos = positions[j]
-                if is_interval_greater_than_three_minutes(end.time, next_pos.time):
+                if checkInterval(end.time, next_pos.time):
                     break
                 end = next_pos
                 j += 1
