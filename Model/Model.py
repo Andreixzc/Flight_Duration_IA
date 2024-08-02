@@ -64,23 +64,23 @@ rmse = np.sqrt(mse)
 print(f'Mean Squared Error: {mse}')
 print(f'Root Mean Squared Error: {rmse}')
 
-# Criar pastas se não existirem
+
 os.makedirs('trainedModel', exist_ok=True)
 
-# Obter o próximo número disponível para a pasta de métricas
+
 metrics_folder = get_next_metricas_folder()
 os.makedirs(metrics_folder, exist_ok=True)
 
-# Salvar o modelo em um arquivo
+
 joblib.dump(model, 'trainedModel/flight_duration_model.pkl')
 print(f"Model saved to 'trainedModel/flight_duration_model.pkl'")
 
-# Salvar MSE e RMSE em um arquivo de texto
+
 with open(f'{metrics_folder}/metrics.txt', 'w') as file:
     file.write(f'Mean Squared Error: {mse}\n')
     file.write(f'Root Mean Squared Error: {rmse}\n')
 
-# Salvar previsões e valores reais em um arquivo CSV
+
 predictions_df = pd.DataFrame({
     'Actual Duration': y_test,
     'Predicted Duration': y_pred
@@ -88,16 +88,15 @@ predictions_df = pd.DataFrame({
 predictions_df.to_csv(f'{metrics_folder}/predictions_vs_actual.csv', index=False)
 print(f"Predictions and actual values saved to '{metrics_folder}/predictions_vs_actual.csv'")
 
-# Plotar a distribuição dos dados
 plt.figure(figsize=(8, 6))
 
-# Plotar distribuição das durações reais
+
 plt.hist(df['Duration'], bins=30, edgecolor='k', alpha=0.7)
 plt.title('Distribuição da Duração Real')
 plt.xlabel('Duração')
 plt.ylabel('Frequência')
 
-# Salvar o gráfico
+
 plt.tight_layout()
 plt.savefig(f'{metrics_folder}/data_distribution.png')
 # plt.show()

@@ -37,7 +37,7 @@ for airport in airports:
 # Ordena os aeroportos pela distância do ponto fixo
 airports.sort(key=lambda x: x['DistanceFromOrigin'])
 
-# Print para depuração: listagem dos aeroportos ordenados
+
 print("Aeroportos ordenados pela distância do ponto fixo (0, 0):")
 for airport in airports:
     print(f"{airport['Name']} ({airport['Code']}): {airport['DistanceFromOrigin']:.2f} km")

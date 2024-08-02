@@ -87,25 +87,24 @@ model.fit(X_train_balanced, y_train_balanced)
 # Fazer previsões
 y_pred = model.predict(X_test_processed)
 
-# Calcular MSE e RMSE
+
 mse = mean_squared_error(y_test, y_pred)
 rmse = np.sqrt(mse)
 print(f'Mean Squared Error: {mse}')
 print(f'Root Mean Squared Error: {rmse}')
 
-# Criar pastas se não existirem
+
 os.makedirs('trainedModel', exist_ok=True)
 
-# Salvar o modelo em um arquivo
 joblib.dump(model, 'trainedModel/flight_duration_model.pkl')
 print(f"Model saved to 'trainedModel/flight_duration_model.pkl'")
 
-# Salvar MSE e RMSE em um arquivo de texto
+
 with open(f'{metrics_folder}/metrics.txt', 'w') as file:
     file.write(f'Mean Squared Error: {mse}\n')
     file.write(f'Root Mean Squared Error: {rmse}\n')
 
-# Salvar previsões e valores reais em um arquivo CSV
+
 predictions_df = pd.DataFrame({
     'Actual Duration': y_test,
     'Predicted Duration': y_pred

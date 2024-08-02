@@ -36,21 +36,20 @@ CREATE TABLE IF NOT EXISTS airports (
 )
 ''')
 
-# Commit changes
+
 conn.commit()
 
-# Read the CSV files
+
 airports_df = pd.read_csv('Dataset/airports.csv', delimiter=';')
 positions_df = pd.read_csv('Dataset/positions.csv', delimiter=';')
 
-# Insert data into airports table
 airports_df.to_sql('airports', conn, if_exists='append', index=False)
 
-# Insert data into positions table
+
 positions_df.to_sql('positions', conn, if_exists='append', index=False)
 
-# Commit changes and close the connection
+
 conn.commit()
 conn.close()
 
-print("Database and tables created, and data populated successfully.")
+print("Banco criado e populado.")
