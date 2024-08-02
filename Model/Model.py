@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
+import joblib  # Import joblib for saving the model
 
 # Load the dataset
 df = pd.read_csv('../Dataset/trainingFlightTable.csv')
@@ -53,21 +54,25 @@ y_pred = model.predict(X_test)
 mse = mean_squared_error(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
 
+# Save the model to a file
+joblib.dump(model, 'flight_duration_model.pkl')
+print("Model saved to 'flight_duration_model.pkl'")
+
 # Save predictions and actual values to a text file
-with open('predictions_vs_actual.txt', 'w') as file:
+with open('predictions_vs_actual.csv', 'w') as file:
     file.write('Actual Duration, Predicted Duration\n')
     for actual, predicted in zip(y_test, y_pred):
         file.write(f'{actual:.2f}, {predicted:.2f}\n')
 
-# Example data for prediction
-example_data = pd.DataFrame({
-    'OriginCode': ['JFK'],
-    'DestinCode': ['LAX'],
-    'WeekDay': [3],
-    'HourDeparture': [14],
-    'ModelAircraft': ['B737']
-})
+# Example data for prediction (Uncomment to use)
+# example_data = pd.DataFrame({
+#     'OriginCode': ['JFK'],
+#     'DestinCode': ['LAX'],
+#     'WeekDay': [3],
+#     'HourDeparture': [14],
+#     'ModelAircraft': ['B737']
+# })
 
-# Predict flight duration
-predicted_duration = model.predict(example_data)
-print(f'Predicted Duration: {predicted_duration[0]} minutes')
+# # Predict flight duration
+# predicted_duration = model.predict(example_data)
+# print(f'Predicted Duration: {predicted_duration[0]} minutes')
