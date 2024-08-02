@@ -1,7 +1,3 @@
-CreateDb.py
-RetriveSorted.py
-ParseAll
-maxFlights
-ExportTableByName -> Longest_Flight_Sequences
-GenerateTrainingTable
-ExportTableByName -> flightSummary
+CreateDb.py (E:\Projetos\TesteTecnico\Database)
+RetriveSorted
+SegmentFlights

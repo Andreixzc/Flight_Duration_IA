@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 import os
 
-# Gera dataset de treino, puxando os voos segmentados na tabela 'flightList' e salvando na tabela 'flightSummary'.
+# Gera dataset de treino, puxando os voos segmentados na tabela 'flightList' e salvando na tabela 'trainingFlightTable'.
 
 def get_weekday(date_str):
     date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
@@ -18,13 +18,13 @@ def calculate_duration(start_time, end_time):
     end = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     return int((end - start).total_seconds() // 60)
 
-def generate_flight_summary(db_file):
+def generate_trainingFlightTable(db_file):
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
 
-    # Criar tabela flightSummary se não existir
+    # Criar tabela trainingFlightTable se não existir
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS flightSummary (
+        CREATE TABLE IF NOT EXISTS trainingFlightTable (
             OriginCode TEXT,
             DestinCode TEXT,
             WeekDay INTEGER,
@@ -35,11 +35,11 @@ def generate_flight_summary(db_file):
     ''')
 
     # Limpar a tabela existente
-    cursor.execute('DELETE FROM flightSummary')
+    cursor.execute('DELETE FROM trainingFlightTable')
 
-    # Inserir dados na tabela flightSummary
+    # Inserir dados na tabela trainingFlightTable
     cursor.execute('''
-        INSERT INTO flightSummary (OriginCode, DestinCode, WeekDay, HourDeparture, ModelAircraft, Duration)
+        INSERT INTO trainingFlightTable (OriginCode, DestinCode, WeekDay, HourDeparture, ModelAircraft, Duration)
         SELECT 
             codeDeparture AS OriginCode,
             codeDestin AS DestinCode,
@@ -51,18 +51,18 @@ def generate_flight_summary(db_file):
     ''')
     conn.commit()
 
-    # Exportar a tabela flightSummary para um arquivo CSV
-    df = pd.read_sql_query('SELECT * FROM flightSummary', conn)
+    # Exportar a tabela trainingFlightTable para um arquivo CSV
+    df = pd.read_sql_query('SELECT * FROM trainingFlightTable', conn)
     
-    output_csv_path = 'dataset/flight_summary.csv'
+    output_csv_path = 'dataset/trainingFlightTable.csv'
     os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
     df.to_csv(output_csv_path, index=False)
     
-    print(f"Table 'flightSummary' saved as 'flight_summary.csv'.")
+    print(f"Table 'trainingFlightTable' saved as 'trainingFlightTable.csv'.")
 
     # Fechar a conexão
     conn.close()
 
 # Exemplo de uso
 db_file = 'Database/Flights.db'
-generate_flight_summary(db_file)
+generate_trainingFlightTable(db_file)
