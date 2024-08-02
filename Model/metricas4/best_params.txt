@@ -1,0 +1,6 @@
+Melhores parâmetros encontrados:
+regressor__bootstrap: True
+regressor__max_depth: None
+regressor__min_samples_leaf: 1
+regressor__min_samples_split: 10
+regressor__n_estimators: 50
