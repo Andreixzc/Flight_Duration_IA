@@ -9,6 +9,7 @@ from sklearn.metrics import mean_squared_error
 import joblib
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Função para encontrar o próximo número de pasta disponível
 def get_next_metricas_folder():
@@ -18,26 +19,27 @@ def get_next_metricas_folder():
         i += 1
     return f'{base_path}{i}'
 
-# Load the dataset
+# Carregar o dataset
 df = pd.read_csv('../Dataset/trainingFlightTable.csv')
 
-# Define features and target
+
+# Definir características e alvo
 X = df[['OriginCode', 'DestinCode', 'WeekDay', 'HourDeparture', 'ModelAircraft']]
 y = df['Duration']
 
-# Features numericas
+# Pipeline para tratar as variáveis numéricas
 numeric_features = ['WeekDay', 'HourDeparture']
 numeric_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='median')),
     ('scaler', StandardScaler())])
 
-# Variáveis categóricas
+# Pipeline para tratar as variáveis categóricas
 categorical_features = ['OriginCode', 'DestinCode', 'ModelAircraft']
 categorical_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='most_frequent')),
     ('onehot', OneHotEncoder(handle_unknown='ignore'))])
 
-# Combine preprocessing for both numeric and categorical data
+# Combinar pré-processamento para dados numéricos e categóricos
 preprocessor = ColumnTransformer(
     transformers=[
         ('num', numeric_transformer, numeric_features),
@@ -48,13 +50,13 @@ model = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', RandomForestRegressor(n_estimators=100, random_state=0))])
 
-# Dividindo o dataset
+# Dividir o dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-# Treinando o modelo
+# Treinar o modelo
 model.fit(X_train, y_train)
 
-# Prevendo
+# Fazer previsões
 y_pred = model.predict(X_test)
 
 # Calcular MSE e RMSE
@@ -86,3 +88,25 @@ predictions_df = pd.DataFrame({
 })
 predictions_df.to_csv(f'{metrics_folder}/predictions_vs_actual.csv', index=False)
 print(f"Predictions and actual values saved to '{metrics_folder}/predictions_vs_actual.csv'")
+
+# Plotar a distribuição dos dados
+plt.figure(figsize=(12, 6))
+
+# Plotar distribuição das durações reais
+plt.subplot(1, 2, 1)
+plt.hist(df['Duration'], bins=30, edgecolor='k', alpha=0.7)
+plt.title('Distribuição da Duração Real')
+plt.xlabel('Duração')
+plt.ylabel('Frequência')
+
+# Plotar distribuição das previsões
+plt.subplot(1, 2, 2)
+plt.hist(y_pred, bins=30, edgecolor='k', alpha=0.7)
+plt.title('Distribuição da Duração Prevista')
+plt.xlabel('Duração Prevista')
+plt.ylabel('Frequência')
+
+# Salvar o gráfico
+plt.tight_layout()
+plt.savefig(f'{metrics_folder}/data_distribution.png')
+# plt.show()
