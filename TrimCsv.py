@@ -13,4 +13,4 @@ def trim_csv_values(file_path):
     print(f"Trim aplicado e dados salvos em '{file_path}'.")
 
 if __name__ == "__main__":
-    trim_csv_values('Dataset/flightSummaryNew.csv')
+    trim_csv_values('Dataset/trainingFlightTable.csv')
