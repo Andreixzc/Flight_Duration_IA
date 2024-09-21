@@ -1,24 +1,136 @@
-### 1ª Tarefa
 
-Primeiro criei o banco de dados com armazenando os dois arquivos CSV, `airports` e `positions`. Depois fiz um script que puxou os dados ordenando eles pelo ID de cada aeronave, a fim de facilitar o pré-processamento. Como os registros eram naturalmente ordenados por tempo, ficou mais fácil.
+# DeepTera Technical Test - Flight Data Processing and ML Model
 
-Daí, chegou a parte de segmentar os voos, e como eu tinha separado os registros em arquivos separados por ID de aeronave, pude segmentá-los em memória porque limitei a quantidade de registros analisados, evitando assim o estouro de RAM e diminuindo a complexidade de ter que salvar a referência dos registros de ID diferente, por exemplo.
+## Project Overview
 
-Percebi que havia um padrão no registro do tempo dos voos e logo cheguei à conclusão que para segmentar os voos em função do tempo. A maior dificuldade foi pensar em um limiar de tempo (intervalo) que separasse os voos. Diante disso, cheguei a 2 possíveis soluções:
+This project involves processing flight data and developing a machine learning model to predict flight duration. The dataset consists of two main files:
+- **positions.csv**: Contains aircraft position data with time, latitude, longitude, altitude, ground speed, aircraft ID, and model.
+- **airports.csv**: Contains airport details, including codes, names, locations, and altitude.
 
-1. **Percorrer o CSV de `airports` e tentar encontrar um limiar que gerasse o menor tempo de voo possível dada essa combinação de aeroportos.**  
-   Problema: Complexidade alta, teríamos que pensar em ordenar os arquivos em chunks de distância baseadas em um ponto de origem, sendo assim teríamos que pensar em definir uma distância de threshold entre aeroportos para agrupá-los, pois se não fizermos isso, temos a chance de calcular distâncias de voos que não são possíveis de fazer. Daí, usaríamos esse limiar para segmentar os voos.
+The project has three primary tasks:
+1. **Listing Flights**: Extract flight departure and arrival information, ordered by departure time.
+2. **Longest Sequence of Flights**: Determine the maximum number of flights for each aircraft within a 2-day sliding window.
+3. **Flight Duration Prediction Model**: Train a machine learning model to predict flight duration.
 
-2. **Definir um limiar base e, por tentativa e erro, encontrar uma que minimiza os voos 'impossíveis', de duração duvidosa.**  
-   Depois disso, bastaria remover os voos que por acaso tiveram a mesma origem e o mesmo destino. Depois talvez os outliers, que são casos incomuns, como por exemplo os casos de voos que têm duração muito pequena que são provenientes de destinos inóspitos, como ilhas.  
-   Problema: Essa solução ainda pode gerar inconsistências, mas realisticamente falando é a mais viável. 
+---
 
-Optei pela segunda opção. Depois disso, bastou fazer a aproximação das coordenadas de origem e destino para encontrar os respectivos aeroportos.
+## Setup Instructions
 
-### 2ª Tarefa
+### Prerequisites
+- Python 3.x
+- Pandas
+- Scikit-learn
 
-Problema clássico de sliding window, bastou ir 'deslizando' a janela até encontrar o maior valor possível que respeitava o intervalo de 2 dias. Primeiramente pensei que pudesse ser um problema de DP, mas lembrei que tinha que seguir analisando os registros sequencialmente.
+### Installation
 
-### 3ª Tarefa
+Clone the repository and install the necessary dependencies:
 
-Bastou rodar um script para que pegava a tabela gerada na 1ª tarefa e calcular a duração do voo em minutos e pronto, minha base de dados estava pronta para o modelo.
+```bash
+git clone https://github.com/deeptera/flight-data-processing.git
+cd flight-data-processing
+pip install -r requirements.txt
+```
+
+---
+
+## Data Files
+
+- **positions.csv**: 395,183 instances of aircraft positions over time.
+- **airports.csv**: 4,005 instances of airport details.
+
+The structure of each file is as follows:
+
+**positions.csv**
+| Time            | Latitude       | Longitude      | Altitude | GroundSpeed | IdAircraft | ModelAircraft |
+|-----------------|----------------|----------------|----------|-------------|------------|---------------|
+| datetime (UTC)  | decimal (18,12) | decimal (18,12) | km       | km/h        | int        | char (50)     |
+
+**airports.csv**
+| Name        | Code | Latitude       | Longitude      | Altitude | Country     | City     |
+|-------------|------|----------------|----------------|----------|-------------|----------|
+| char (50)   | char (5) | decimal (18,12) | decimal (18,12) | km       | char (50)   | char (50)|
+
+---
+
+## Tasks Breakdown
+
+### 1. Flight Listing
+The script processes the `positions.csv` and `airports.csv` files, generating a list of flights. Each flight is defined by its first and last recorded positions in time, indicating departure and arrival respectively.
+
+**Output:**
+- Departure Date and Time
+- Departure Airport (Code, Name, City)
+- Arrival Date and Time
+- Arrival Airport (Code, Name, City)
+- Aircraft ID and Model
+
+The flights are ordered by departure time.
+
+### 2. Longest Sequence of Flights
+For each aircraft, we calculate the maximum number of flights that occur within any two consecutive days. The data is processed using a sliding window approach, which ensures that the maximum sequence is identified efficiently.
+
+**Output:**
+- 2-day period
+- Aircraft ID and Model
+- Number of flights in the period
+
+### 3. Flight Duration Prediction Model
+The model is designed to predict the flight duration in minutes based on the following input features:
+- Departure Airport Code
+- Arrival Airport Code
+- Day of the Week (1-7)
+- Departure Hour (0-23)
+- Aircraft Model (A319 or A320)
+
+**Steps:**
+- Data preprocessing to format the input features.
+- Training a model (e.g., Random Forest or Gradient Boosting) using Scikit-learn.
+- Evaluating model accuracy using cross-validation.
+
+---
+
+## Key Challenges & Solutions
+
+### Flight Segmentation
+A critical challenge was determining the time threshold that separates flights. To address this:
+1. **Option 1**: Calculate a dynamic threshold based on airport distances—high computational complexity.
+2. **Option 2**: Use a fixed time threshold and iteratively refine it to minimize errors. This approach was more feasible and was chosen for implementation.
+
+### Memory Management
+Segmenting flights based on aircraft IDs allowed the data to be processed in memory, preventing memory overload. The records were pre-sorted by time to simplify processing.
+
+### Outliers & Noise
+Flights with implausibly short durations, such as those involving remote locations, were flagged as outliers and excluded from further analysis.
+
+---
+
+## Running the Scripts
+
+1. **Flight Listing**: Run the following command to generate the list of flights:
+    ```bash
+    python flight_listing.py
+    ```
+
+2. **Longest Flight Sequence**: Run the sliding window script to find the longest sequence of flights within 2 days:
+    ```bash
+    python flight_sequence.py
+    ```
+
+3. **Flight Duration Prediction**: Train and evaluate the machine learning model:
+    ```bash
+    python flight_duration_model.py
+    ```
+
+---
+
+## Improvements & Future Work
+
+- **Feature Engineering**: Incorporating additional features such as weather data or historical delays could improve model accuracy.
+- **Threshold Optimization**: A more sophisticated method for determining flight segmentation thresholds could further reduce noise and errors.
+- **Model Tuning**: Hyperparameter optimization and testing more advanced algorithms (e.g., XGBoost) could yield better prediction results.
+
+---
+
+## Conclusion
+
+This project successfully implemented flight data processing and an initial machine learning model for flight duration prediction. The results provide a foundation for further exploration and refinement.
