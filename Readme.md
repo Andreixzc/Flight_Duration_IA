@@ -1,5 +1,5 @@
 
-# DeepTera Technical Test - Flight Data Processing and ML Model
+# ML model to predict flight duration
 
 ## Project Overview
 
